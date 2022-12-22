@@ -1,5 +1,7 @@
 import cron from 'node-cron';
 
-cron.schedule(`*/1 * * * *`, async () => {
+cron.schedule(`*/180 * * * *`, async () => {
   console.log(`running your task...`);
+  
+  console.log(`finished running your task...`);
 });
