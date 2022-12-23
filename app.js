@@ -66,7 +66,7 @@ const getData = async () => {
 }
 
 console.log(`scheduling your task...`);
-cron.schedule(`*/30 * * * * *`, async () => {
+cron.schedule(`*/120 * * * *`, async () => {
     console.log(`running your task...`);
     getData();
     
