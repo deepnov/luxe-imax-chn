@@ -3,7 +3,7 @@ var fetch = require('node-fetch');
 var { JSDOM } = require('jsdom');
 
 const { WebClient, LogLevel } = require("@slack/web-api");
-const slackAPIKey = "xoxb-885268749351-2147595198260-7vIDSp8TCpMfwnMlnSCpDNNG";
+const slackAPIKey = "xyz";//removed api key as slack keys cannot be shared publicly
 const channelId = "luxe-imax-chn";
 
 const url = 'https://in.bookmyshow.com/chennai/cinemas/luxe-cinemas-chennai/JACM'
