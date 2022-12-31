@@ -1,13 +1,24 @@
 var cron = require('node-cron');
 var fetch = require('node-fetch');
 var { JSDOM } = require('jsdom');
+const tDate = new Date();
 
 const { WebClient, LogLevel } = require("@slack/web-api");
-const slackAPIKey = "xyz";//removed api key as slack keys cannot be shared publicly
-const channelId = "luxe-imax-chn";
+const slackAPIKey = (typeof process.env.SLACK_API_VAL != "undefined") ? process.env.SLACK_API_VAL :"";
+const trackKey = (typeof process.env.LUXE_DATE != "undefined") ? process.env.LUXE_DATE : tDate.getDate()+7;
+
+const channelId = "C024V8L99NC";//luxe-imax-chn
+
+const trackingDate = trackKey;
+
+if (slackAPIKey == "" ) {
+
+    throw new Error('Slack API ID missing');
+}
 
 const url = 'https://in.bookmyshow.com/chennai/cinemas/luxe-cinemas-chennai/JACM'
-const trackingDate = 26;
+
+
 
 function notifySubscribers(msg) {
 
@@ -44,6 +55,9 @@ function checkBookingDates(pageResponse) {
         if ( dt>= trackingDate) {
             success = true;
         }
+
+        if (i == doc.getElementsByClassName("date-numeric").length - 1) {
+            process.env.LUXE_DATE = parseInt(dt)+1;}
     }
     if (success) {
         console.log(SUCCESS_MSG);
@@ -66,7 +80,7 @@ const getData = async () => {
 }
 
 console.log(`scheduling your task...`);
-cron.schedule(`*/120 * * * *`, async () => {
+cron.schedule(`*/125 * * * *`, async () => {//in production this is */125 minutes field
     console.log(`running your task...`);
     getData();
     
