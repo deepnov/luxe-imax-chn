@@ -5,11 +5,10 @@ const tDate = new Date();
 
 const { WebClient, LogLevel } = require("@slack/web-api");
 const slackAPIKey = (typeof process.env.SLACK_API_VAL != "undefined") ? process.env.SLACK_API_VAL :"";
-const trackKey = (typeof process.env.LUXE_DATE != "undefined") ? process.env.LUXE_DATE : tDate.getDate()+7;
+let trackingDate = 0;
 
-const channelId = "C024V8L99NC";//luxe-imax-chn
+const channelId = "C024V8L99NC";//C024V8L99NC-luxe-imax-chn
 
-const trackingDate = trackKey;
 
 if (slackAPIKey == "" ) {
 
@@ -45,19 +44,21 @@ function checkBookingDates(pageResponse) {
     let doc = jsdom.window.document;
     let success = false;
     let venue = doc.getElementsByClassName("venue-heading")[0].textContent;
-    let SUCCESS_MSG = venue + " bookings available from this month " + trackingDate
-    let FAILURE_MSG=venue + " bookings available only until this month " + doc.getElementsByClassName("date-numeric")[doc.getElementsByClassName("date-numeric").length - 1].childNodes[0].textContent.trim()
+    let SUCCESS_MSG = "";
+    let FAILURE_MSG = venue + " bookings available only until this month " + parseInt(doc.getElementsByClassName("date-numeric")[doc.getElementsByClassName("date-numeric").length - 1].childNodes[0].textContent.trim())
     console.log("Venue: " + venue);
     for (i = 0; i < doc.getElementsByClassName("date-numeric").length; i++) {
 
-        let dt = doc.getElementsByClassName("date-numeric")[i].childNodes[0].textContent.trim();
-
+        let dt = parseInt(doc.getElementsByClassName("date-numeric")[i].childNodes[0].textContent.trim());
+        
         if ( dt>= trackingDate) {
             success = true;
+            SUCCESS_MSG = venue + " bookings available from this month " + dt
         }
 
         if (i == doc.getElementsByClassName("date-numeric").length - 1) {
-            process.env.LUXE_DATE = parseInt(dt)+1;}
+            process.env.LUXE_DATE = dt + 1;
+        }
     }
     if (success) {
         console.log(SUCCESS_MSG);
@@ -82,6 +83,7 @@ const getData = async () => {
 console.log(`scheduling your task...`);
 cron.schedule(`*/125 * * * *`, async () => {//in production this is */125 minutes field
     console.log(`running your task...`);
+    trackingDate = (typeof process.env.LUXE_DATE != "undefined") ? process.env.LUXE_DATE : 0;
     getData();
     
 });
