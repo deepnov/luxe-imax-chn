@@ -81,7 +81,7 @@ const getData = async () => {
 }
 
 console.log(`scheduling your task...`);
-cron.schedule(`*/125 * * * *`, async () => {//in production this is */125 minutes field
+cron.schedule(`*/40 * * * * *`, async () => {//in production this is */125 minutes field
     console.log(`running your task...`);
     trackingDate = (typeof process.env.LUXE_DATE != "undefined") ? process.env.LUXE_DATE : 0;
     getData();
