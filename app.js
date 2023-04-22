@@ -1,13 +1,13 @@
 var cron = require('node-cron');
 var fetch = require('node-fetch');
-var { JSDOM } = require('jsdom');
+
 const tDate = new Date();
 
 const { WebClient, LogLevel } = require("@slack/web-api");
 const slackAPIKey = (typeof process.env.SLACK_API_VAL != "undefined") ? process.env.SLACK_API_VAL :"";
 let trackingDate = 0;
 
-const channelId = "C024V8L99NC";//C024V8L99NC-luxe-imax-chn
+const channelId = "C024V8L99NC";//C024V8L99NC-luxe-imax-chn 
 
 
 if (slackAPIKey == "" ) {
@@ -15,9 +15,13 @@ if (slackAPIKey == "" ) {
     throw new Error('Slack API ID missing');
 }
 
-const url = 'https://in.bookmyshow.com/chennai/cinemas/luxe-cinemas-chennai/JACM'
+//const url = 'https://in.bookmyshow.com/cinemas/chennai/inox-luxe-phoenix-market-city-velachery/INPR'
+const url = 'https://paytm.com/movies/chennai/inox-phoenix-market-city-velachery-formerly-jazz-cinemas-c/51767?fromdate=2023-04-28'
 
 
+function english_ordinal_suffix(dt) {
+    return dt.getDate() + (dt.getDate() % 10 == 1 && dt.getDate() != 11 ? 'st' : (dt.getDate() % 10 == 2 && dt.getDate() != 12 ? 'nd' : (dt.getDate() % 10 == 3 && dt.getDate() != 13 ? 'rd' : 'th')));
+}
 
 function notifySubscribers(msg) {
 
@@ -38,34 +42,35 @@ function notifySubscribers(msg) {
 
 
 function checkBookingDates(pageResponse) {
+    let ts = Date.now();
 
+    let date_time = new Date(ts);
+    let date = date_time.getDate();
+    let month = date_time.getMonth() + 1;
+    let year = date_time.getFullYear();
+    let min = date_time.getMinutes();
+    let hrs = date_time.getHours();
+    let log_dt = "["+year + "-" + month + "-" + date + " " + hrs + ":" + min+"]"
+    //console.log(pageResponse.includes("No movies found for the search result"));
     //console.log(pageResponse);
-    let jsdom = new JSDOM(pageResponse);
-    let doc = jsdom.window.document;
     let success = false;
-    let venue = doc.getElementsByClassName("venue-heading")[0].textContent;
+    let venue = "Luxe Inox";
     let SUCCESS_MSG = "";
-    let FAILURE_MSG = venue + " bookings available only until this month " + parseInt(doc.getElementsByClassName("date-numeric")[doc.getElementsByClassName("date-numeric").length - 1].childNodes[0].textContent.trim())
+    //console.log(doc);
     console.log("Venue: " + venue);
-    for (i = 0; i < doc.getElementsByClassName("date-numeric").length; i++) {
 
-        let dt = parseInt(doc.getElementsByClassName("date-numeric")[i].childNodes[0].textContent.trim());
-        
-        if ( dt>= trackingDate) {
-            success = true;
-            SUCCESS_MSG = venue + " bookings available from this month " + dt
-        }
-
-        if (i == doc.getElementsByClassName("date-numeric").length - 1) {
-            process.env.LUXE_DATE = dt + 1;
-        }
+    
+    if (!pageResponse.includes("No movies found for the search result")) {
+        success = true;
+        SUCCESS_MSG = log_dt + " " + venue + " bookings available for 28th april ";
     }
+
     if (success) {
         console.log(SUCCESS_MSG);
         notifySubscribers(SUCCESS_MSG);
     }
     else {
-        console.log(FAILURE_MSG)
+        console.log(log_dt + " " + venue + " bookings not available");
         //notifySubscribers(FAILURE_MSG);
     }
 
@@ -74,16 +79,37 @@ function checkBookingDates(pageResponse) {
 
 const getData = async () => {
     const res = await fetch(url, {
-        headers: { 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.107 Safari/537.36' }})
-    const data = await res.text()
-    checkBookingDates(data);    
-    
+        headers: {
+            
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:109.0) Gecko/20100101 Firefox/110.0',
+            "Connection": "keep-alive",
+            "Upgrade-Insecure-Requests": "1",
+            "Sec-Fetch-Dest": "document",
+            "Sec-Fetch-Mode": "navigate",
+            "Sec-Fetch-Site": "none",
+            "Sec-Fetch-User": "?1",
+            "Cache-Control": "max-age=0",
+
+        }
+    })
+    if (res.status >= 400) {
+        for (const k of res.headers.keys()) {
+            console.log(k + " : " + res.headers.get(k));
+        }
+        throw new Error('Target website is not providing content! ');
+    }
+    else {
+        const data = await res.text()
+        checkBookingDates(data);
+    }
 }
 
 console.log(`scheduling your task...`);
-cron.schedule(`*/120 * * * *`, async () => {//in production this is */125 minutes field
+cron.schedule(`* */30 * * * *`, async () => {//in production this is */125 minutes field
     console.log(`running your task...`);
-    trackingDate = (typeof process.env.LUXE_DATE != "undefined") ? process.env.LUXE_DATE : 0;
     getData();
     
 });
