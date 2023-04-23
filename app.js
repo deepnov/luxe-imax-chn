@@ -60,7 +60,7 @@ function checkBookingDates(pageResponse) {
     console.log("Venue: " + venue);
 
     
-    if (!pageResponse.includes("No movies found for the search result")) {
+    if (!pageResponse.includes("No movies found for the search result")&&pageResponse.includes(">29<")) {
         success = true;
         SUCCESS_MSG = log_dt + " " + venue + " bookings available for 28th april ";
     }
