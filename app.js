@@ -108,7 +108,7 @@ const getData = async () => {
 }
 
 console.log(`scheduling your task...`);
-cron.schedule(`* */30 * * * *`, async () => {//in production this is */125 minutes field
+cron.schedule(`*/30 * * * *`, async () => {//in production this is */125 minutes field
     console.log(`running your task...`);
     getData();
     
