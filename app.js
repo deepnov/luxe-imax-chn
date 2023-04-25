@@ -15,7 +15,7 @@ if (slackAPIKey == "" ) {
     throw new Error('Slack API ID missing');
 }
 
-const url='https://paytm.com/movies/chennai/spi-palazzo-nexus-vijaya-mall-vadapalani-chennai-c/10193?fromdate=2023-04-28';
+url="https://paytm.com/movies/chennai/spi-palazzo-nexus-vijaya-mall-vadapalani-chennai-c/10193?fromdate=2023-04-28"
 
 
 function english_ordinal_suffix(dt) {
