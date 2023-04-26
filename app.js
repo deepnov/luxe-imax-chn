@@ -15,7 +15,7 @@ if (slackAPIKey == "" ) {
     throw new Error('Slack API ID missing');
 }
 
-url="https://paytm.com/movies/chennai/spi-palazzo-nexus-vijaya-mall-vadapalani-chennai-c/10193?fromdate=2023-04-28"
+url="https://paytm.com/movies/chennai/spi-palazzo-nexus-vijaya-mall-vadapalani-chennai-c/10193?fromdate=2023-04-29"
 
 
 function english_ordinal_suffix(dt) {
@@ -53,7 +53,7 @@ function checkBookingDates(pageResponse) {
     //console.log(pageResponse.includes("No movies found for the search result"));
     //console.log(pageResponse);
     let success = false;
-    let venue = "Luxe Inox";
+    let venue = "spi-palazzo-nexus-vijaya-mall";
     let SUCCESS_MSG = "";
     //console.log(doc);
     console.log("Venue: " + venue);
